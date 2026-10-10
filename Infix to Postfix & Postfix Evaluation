@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+int precedence(char op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    return 0;
+}
+
+void infixToPostfix(char* infix, char* postfix) {
+    char stack[100];
+    int top = -1, k = 0;
+
+    for (int i = 0; infix[i]; i++) {
+        if (isalnum(infix[i])) {
+            postfix[k++] = infix[i];
+        } else if (infix[i] == '(') {
+            stack[++top] = infix[i];
+        } else if (infix[i] == ')') {
+            while (top != -1 && stack[top] != '(')
+                postfix[k++] = stack[top--];
+            top--;
+        } else {
+            while (top != -1 && precedence(stack[top]) >= precedence(infix[i]))
+                postfix[k++] = stack[top--];
+            stack[++top] = infix[i];
+        }
+    }
+    while (top != -1) postfix[k++] = stack[top--];
+    postfix[k] = '\0';
+}
+
+int evaluatePostfix(char* exp) {
+    int stack[100], top = -1;
+    for (int i = 0; exp[i]; i++) {
+        if (isdigit(exp[i])) {
+            stack[++top] = exp[i] - '0';
+        } else {
+            int val2 = stack[top--];
+            int val1 = stack[top--];
+            switch (exp[i]) {
+                case '+': stack[++top] = val1 + val2; break;
+                case '-': stack[++top] = val1 - val2; break;
+                case '*': stack[++top] = val1 * val2; break;
+                case '/': stack[++top] = val1 / val2; break;
+            }
+        }
+    }
+    return stack[top];
+}
